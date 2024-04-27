@@ -1,14 +1,19 @@
-fn create_sin(start : f64, stop : f64, steps : u32) -> Vec<f64> {
+fn create_sin(start : f64, stop : f64, steps : u32) -> Vec<Point> {
     let mut list : Vec<_>  = Vec::new();
     let step_size : f64 = (stop - start)/(steps as f64);
     for i in 0..steps {
         list.push(start + (i as f64)*step_size);
     }
     let list : Vec<_> = list.iter()
-                        .map(|&x| (x as f64)*2.0*std::f64::consts::PI)
-                        .map(|x| x.sin())
+                        .map(|&x| Point {y: ((x as f64)*2.0*std::f64::consts::PI).sin(), x})
                         .collect();
     list
+}
+
+#[derive(Debug)]
+struct Point {
+    y : f64,
+    x : f64
 }
 
 struct Range {
@@ -38,8 +43,11 @@ impl Iterator for Range {
 }
 
 
-// fn rdp_alg(data : Vec<f64>, eps : f64) -> Vec<f64> {
+// struct regularIntervalpoint
 
+// fn rdp_alg(data : Vec<Point>, eps : f64) -> Vec<Point> {
+//     let t = data.get(0).unwrap() + data.last().unwrap();
+//     data;
 // }
 
 

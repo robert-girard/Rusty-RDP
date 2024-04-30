@@ -1,11 +1,12 @@
 use eframe::egui::{self, DragValue, Event, Vec2};
 use egui_plot::{Line, Legend, PlotPoints, PlotPoint};
 use std::f64::consts::PI;
+use std::env;
 
 fn create_sin(start : f64, stop : f64, steps : u32) -> Vec<Point> {
     let mut list : Vec<_>  = Vec::new();
-    let step_size : f64 = (stop - start)/(steps as f64);
-    for i in 0..steps {
+    let step_size : f64 = (stop - start)/((steps -1) as f64);
+    for i in 0..(steps) {
         list.push(start + (i as f64)*step_size);
     }
     let list : Vec<_> = list.iter()
@@ -21,10 +22,10 @@ struct Point {
 }
 
 impl Point {
-    fn asPlotPoint(&self) -> PlotPoint {
+    fn as_plot_point(&self) -> PlotPoint {
         return PlotPoint::new(self.x, self.y);
     }
-    fn asArr(&self) -> [f64;2] {
+    fn as_arr(&self) -> [f64;2] {
         return [(&self.x).to_owned(),(&self.y).to_owned()];
     }
 }
@@ -64,23 +65,31 @@ fn perpendicular_distance(l1 : &Point, l2 : &Point, p : &Point) -> f64{
     num/den
 }
 
+fn vertical_distance(l1 : &Point, l2 : &Point, p : &Point) -> f64{
+    let slope = (l2.y-l1.y)/(l2.x-l1.x);
+    let x_dist = p.x-l1.x;
+    let line_y = l1.y + x_dist*slope;
+    (line_y - p.y).abs()
+}
+
 fn rdp_alg(data : &mut Vec<Point>, eps : f64) -> Option<Vec<Point>> {
     let mut dmax : f64 = 0.0;
     let mut imax =  0;
+    let l1 = data.first()?;
+    let l2 = data.last()?;
     for i in 1..(data.len()-2) {
-        let l1 = data.first()?;
-        let l2 = data.last()?;
         let p = data.get(i)?;
-        let d = perpendicular_distance(l1, l2, p);
+        let d = vertical_distance(l1, l2, p);
         if d > dmax {
             imax = i;
             dmax = d;
         }
     }
     if dmax > eps {
-        let mut second_half = data.split_off(imax);
-        // data.push(second_half.first()?.to_owned().clone());
-        let mut first = rdp_alg(data, eps)?;
+        let mut first_half = data.clone();
+        let mut second_half = first_half.split_off(imax);
+        first_half.push(second_half.first().unwrap().clone());
+        let mut first = rdp_alg(&mut first_half, eps)?;
         let mut second = rdp_alg(&mut second_half, eps)?;
         first.pop();
         first.append(&mut second);
@@ -92,14 +101,15 @@ fn rdp_alg(data : &mut Vec<Point>, eps : f64) -> Option<Vec<Point>> {
 
 
 fn main() -> Result<(), eframe::Error> {
-    let list : Vec<PlotPoint> = create_sin(0.0, 2.0, 30).iter().map(|x| x.asPlotPoint()).collect();
-    println!("Hello, world!");
-    println!("{:?}", list);
-    let range = Range::new(0.0,10.0,10);
-    let vals : Vec<_> = range.collect();
-    println!("{:?}", vals);
-    let mut list : Vec<Point> = create_sin(0.0, 2.0, 30);
-    println!("{:?}", rdp_alg(&mut list, 0.2));
+    env::set_var("RUST_BACKTRACE", "1");
+    let list : Vec<PlotPoint> = create_sin(0.0, 2.0, 30).iter().map(|x| x.as_plot_point()).collect();
+    // println!("Hello, world!");
+    // println!("{:?}", list);
+    // let range = Range::new(0.0,10.0,10);
+    // let vals : Vec<_> = range.collect();
+    // println!("{:?}", vals);
+    // let mut list : Vec<Point> = create_sin(0.0, 2.0, 30);
+    // println!("{:?}", rdp_alg(&mut list, 0.2));
 
 
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
@@ -216,16 +226,11 @@ impl eframe::App for PlotExample {
                         }
                         plot_ui.translate_bounds(pointer_translate);
                     }
-
-                    let sine_points = PlotPoints::from_explicit_callback(|x| x.sin(), .., 5000);
-                    plot_ui.line(Line::new(sine_points).name("Sine"));
-                    let sine_points = PlotPoints::from_explicit_callback(|x| (x + PI/4.0).sin(), .., 5000);
-                    plot_ui.line(Line::new(sine_points).name("Sine+pi/4"));
-                    let some_points : Vec<[f64;2]> = create_sin(0.0, 2.0, 300).iter().map(|x| x.asArr()).collect();
+                    let some_points : Vec<[f64;2]> = create_sin(0.0, 2.0, 300).iter().map(|x| x.as_arr()).collect();
                     let sine_points = PlotPoints::from(some_points);
                     plot_ui.line(Line::new(sine_points).name("somepoints"));
                     let mut some_points : Vec<Point> = create_sin(0.0, 2.0, 300);
-                    let some_points : Vec<[f64;2]> = rdp_alg(&mut some_points, 0.1).unwrap().iter().map(|x| x.asArr()).collect();
+                    let some_points : Vec<[f64;2]> = rdp_alg(&mut some_points, 0.05).unwrap().iter().map(|x| x.as_arr()).collect();
                     let sine_points = PlotPoints::from(some_points);
                     plot_ui.line(Line::new(sine_points).name("rdp"));
                 });

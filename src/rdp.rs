@@ -22,6 +22,9 @@ impl Point {
     pub fn as_arr(&self) -> [f64;2] {
         return [(&self.x).to_owned(),(&self.y).to_owned()];
     }
+    pub fn new(x : f64, y : f64) -> Point {
+        Point {x : x, y : y}
+    }
 }
 
 pub struct Range {
@@ -32,7 +35,7 @@ pub struct Range {
 }
 
 impl Range {
-    fn new(start : f64, end : f64, steps : u32) -> Range {
+    pub fn new(start : f64, end : f64, steps : u32) -> Range {
         Range {start:start, end:end, steps:steps, current:start - (end-start)/(steps as f64)}
     }
 }

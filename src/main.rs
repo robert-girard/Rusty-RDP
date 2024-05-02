@@ -32,7 +32,7 @@ impl Default for PlotExample {
             zoom_speed: 1.0,
             scroll_speed: 1.0,
             range_start: 0.0,
-            range_end: 1.0,
+            range_end: 2.0,
             range_steps: 300,
             func: MathFunc::Sin,
             epsilon: 0.05,
@@ -52,7 +52,7 @@ impl eframe::App for PlotExample {
                 });
                 ui.horizontal(|ui| {
                     ui.add(
-                        Slider::new(&mut self.range_end, 0.0..=5.0)
+                        Slider::new(&mut self.range_end, 0.0..=10.0)
                     );
                     ui.label("end value").on_hover_text("TBD");
                 });
@@ -129,7 +129,10 @@ impl eframe::App for PlotExample {
                         }
                         plot_ui.translate_bounds(pointer_translate);
                     }
-                    let mut some_points : Vec<rdp::Point> = rdp::create_sin(&self.range_start, &self.range_end, &self.range_steps);
+                    // let mut some_points : Vec<rdp::Point> = rdp::create_sin(&self.range_start, &self.range_end, &self.range_steps);
+                    let mut some_points : Vec<rdp::Point> = rdp::Range::new(self.range_start, self.range_end, self.range_steps).map( |x| -> rdp::Point {
+                        rdp::Point::new(x, (x).sin())
+                        }).collect();
                     let plot_points : Vec<[f64;2]> = some_points.clone().iter().map(|x| x.as_arr()).collect();
                     let sine_points = PlotPoints::from(plot_points);
                     plot_ui.line(Line::new(sine_points).name("somepoints"));

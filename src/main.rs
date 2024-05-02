@@ -3,6 +3,7 @@ use egui_plot::{Line, Legend, PlotPoints};
 
 mod rdp;
 
+#[derive(Debug, PartialEq)]
 enum MathFunc {
     Sin,
     Exp,
@@ -66,11 +67,18 @@ impl eframe::App for PlotExample {
                 });
                 ui.horizontal(|ui| {
                     ui.add(
-                        Slider::new(&mut self.epsilon, 0.0..=0.5)
+                        Slider::new(&mut self.epsilon, 0.0..=2.0)
                     );
                     ui.label("epsilon").on_hover_text("TBD");
                 });
             });
+            egui::ComboBox::from_label("Select Function")
+            .selected_text(format!("{:?}", self.func))
+            .show_ui(ui, |ui| {
+                ui.selectable_value(&mut self.func, MathFunc::Sin, "Sine");
+                ui.selectable_value(&mut self.func, MathFunc::Exp, "Exp");
+            }
+        );
         });
         egui::CentralPanel::default().show(ctx, |ui| {
             let (scroll, pointer_down, modifiers) = ui.input(|i| {
@@ -131,7 +139,10 @@ impl eframe::App for PlotExample {
                     }
                     // let mut some_points : Vec<rdp::Point> = rdp::create_sin(&self.range_start, &self.range_end, &self.range_steps);
                     let mut some_points : Vec<rdp::Point> = rdp::Range::new(self.range_start, self.range_end, self.range_steps).map( |x| -> rdp::Point {
-                        rdp::Point::new(x, (x).sin())
+                        rdp::Point::new(x, match &self.func {
+                            MathFunc::Sin => (x).sin(),
+                            MathFunc::Exp => (x).exp(),
+                        })
                         }).collect();
                     let plot_points : Vec<[f64;2]> = some_points.clone().iter().map(|x| x.as_arr()).collect();
                     let sine_points = PlotPoints::from(plot_points);

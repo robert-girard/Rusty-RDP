@@ -1,4 +1,4 @@
-use eframe::egui::{self, DragValue, Event, Vec2};
+use eframe::egui::{self, DragValue, Slider, Event, Vec2};
 use egui_plot::{Line, Legend, PlotPoints};
 
 mod rdp;
@@ -42,58 +42,34 @@ impl Default for PlotExample {
 
 impl eframe::App for PlotExample {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
-        egui::SidePanel::left("options").show(ctx, |ui| {
-            ui.checkbox(&mut self.lock_x, "Lock x axis").on_hover_text("Check to keep the X axis fixed, i.e., pan and zoom will only affect the Y axis");
-            ui.checkbox(&mut self.lock_y, "Lock y axis").on_hover_text("Check to keep the Y axis fixed, i.e., pan and zoom will only affect the X axis");
-            ui.checkbox(&mut self.ctrl_to_zoom, "Ctrl to zoom").on_hover_text("If unchecked, the behavior of the Ctrl key is inverted compared to the default controls\ni.e., scrolling the mouse without pressing any keys zooms the plot");
-            ui.checkbox(&mut self.shift_to_horizontal, "Shift for horizontal scroll").on_hover_text("If unchecked, the behavior of the shift key is inverted compared to the default controls\ni.e., hold to scroll vertically, release to scroll horizontally");
-            ui.horizontal(|ui| {
-                ui.add(
-                    DragValue::new(&mut self.zoom_speed)
-                        .clamp_range(0.1..=2.0)
-                        .speed(0.1),
-                );
-                ui.label("Zoom speed").on_hover_text("How fast to zoom in and out with the mouse wheel");
+        egui::TopBottomPanel::top("options").show(ctx, |ui| {
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.add(
+                        Slider::new(&mut self.range_start, 0.0..=5.0)
+                    );
+                    ui.label("start value").on_hover_text("TBD");
+                });
+                ui.horizontal(|ui| {
+                    ui.add(
+                        Slider::new(&mut self.range_end, 0.0..=5.0)
+                    );
+                    ui.label("end value").on_hover_text("TBD");
+                });
             });
-            ui.horizontal(|ui| {
-                ui.add(
-                    DragValue::new(&mut self.scroll_speed)
-                        .clamp_range(0.1..=100.0)
-                        .speed(0.1),
-                );
-                ui.label("Scroll speed").on_hover_text("How fast to pan with the mouse wheel");
-            });
-            ui.horizontal(|ui| {
-                ui.add(
-                    DragValue::new(&mut self.range_start)
-                        .clamp_range(0.0..=5.0)
-                        .speed(0.1),
-                );
-                ui.label("start value").on_hover_text("TBD");
-            });
-            ui.horizontal(|ui| {
-                ui.add(
-                    DragValue::new(&mut self.range_end)
-                        .clamp_range(0.0..=5.0)
-                        .speed(0.1),
-                );
-                ui.label("end value").on_hover_text("TBD");
-            });
-            ui.horizontal(|ui| {
-                ui.add(
-                    DragValue::new(&mut self.range_steps)
-                        .clamp_range(10..=1000)
-                        .speed(10),
-                );
-                ui.label("steps").on_hover_text("TBD");
-            });
-            ui.horizontal(|ui| {
-                ui.add(
-                    DragValue::new(&mut self.epsilon)
-                        .clamp_range(0.0..=5.0)
-                        .speed(0.001),
-                );
-                ui.label("epsilon").on_hover_text("TBD");
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.add(
+                        Slider::new(&mut self.range_steps, 10..=1000)
+                    );
+                    ui.label("steps").on_hover_text("TBD");
+                });
+                ui.horizontal(|ui| {
+                    ui.add(
+                        Slider::new(&mut self.epsilon, 0.0..=0.5)
+                    );
+                    ui.label("epsilon").on_hover_text("TBD");
+                });
             });
         });
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -108,8 +84,6 @@ impl eframe::App for PlotExample {
                 });
                 (scroll, i.pointer.primary_down(), i.modifiers)
             });
-
-            ui.label("This example shows how to use raw input events to implement different plot controls than the ones egui provides by default, e.g., default to zooming instead of panning when the Ctrl key is not pressed, or controlling much it zooms with each mouse wheel step.");
 
             egui_plot::Plot::new("plot")
                 .allow_zoom(false)

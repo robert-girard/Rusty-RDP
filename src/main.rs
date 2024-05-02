@@ -144,17 +144,6 @@ impl eframe::App for PlotExample {
 
 
 fn main() -> Result<(), eframe::Error> {
-    // env::set_var("RUST_BACKTRACE", "1");
-    // let list : Vec<PlotPoint> = create_sin(0.0, 2.0, 30).iter().map(|x| x.as_plot_point()).collect();
-    // println!("Hello, world!");
-    // println!("{:?}", list);
-    // let range = Range::new(0.0,10.0,10);
-    // let vals : Vec<_> = range.collect();
-    // println!("{:?}", vals);
-    // let mut list : Vec<Point> = create_sin(0.0, 2.0, 30);
-    // println!("{:?}", rdp_alg(&mut list, 0.2));
-
-
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions::default();
     eframe::run_native(

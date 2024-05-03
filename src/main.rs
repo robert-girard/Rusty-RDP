@@ -21,6 +21,7 @@ pub struct PlotExample {
     range_steps: u32,
     func: MathFunc,
     epsilon: f64,
+    info_string: String
 }
 
 impl Default for PlotExample {
@@ -37,6 +38,8 @@ impl Default for PlotExample {
             range_steps: 300,
             func: MathFunc::Sin,
             epsilon: 0.05,
+            info_string: String::from(""),
+
         }
     }
 }
@@ -44,41 +47,49 @@ impl Default for PlotExample {
 impl eframe::App for PlotExample {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         egui::TopBottomPanel::top("options").show(ctx, |ui| {
-            ui.vertical(|ui| {
+            // ui.vertical(|ui| {
                 ui.horizontal(|ui| {
+                // ui.vertical(|ui| {
+                    ui.label("start value").on_hover_text("TBD");
                     ui.add(
                         Slider::new(&mut self.range_start, 0.0..=5.0)
                     );
-                    ui.label("start value").on_hover_text("TBD");
-                });
-                ui.horizontal(|ui| {
+                // });
+                // ui.horizontal(|ui| {
+                // ui.vertical(|ui| {
+                    ui.label("end value").on_hover_text("TBD");
                     ui.add(
                         Slider::new(&mut self.range_end, 0.0..=10.0)
                     );
-                    ui.label("end value").on_hover_text("TBD");
-                });
-            });
-            ui.vertical(|ui| {
-                ui.horizontal(|ui| {
+                // });
+            // });
+            // ui.vertical(|ui| {
+                // ui.horizontal(|ui| {
+                // ui.vertical(|ui| {
+                    ui.label("steps").on_hover_text("TBD");
                     ui.add(
                         Slider::new(&mut self.range_steps, 10..=1000)
                     );
-                    ui.label("steps").on_hover_text("TBD");
-                });
-                ui.horizontal(|ui| {
+                // });
+                // ui.horizontal(|ui| {
+                // ui.vertical(|ui| {
+                    ui.label("epsilon").on_hover_text("TBD");
                     ui.add(
                         Slider::new(&mut self.epsilon, 0.0..=2.0)
                     );
-                    ui.label("epsilon").on_hover_text("TBD");
+                // });
+            // });
+            // ui.vertical(|ui| {
+                ui.label("Select Function");
+                egui::ComboBox::new("func selector", "")
+                .selected_text(format!("{:?}", self.func))
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut self.func, MathFunc::Sin, "Sine");
+                    ui.selectable_value(&mut self.func, MathFunc::Exp, "Exp");
                 });
+                ui.label(&self.info_string);
+
             });
-            egui::ComboBox::from_label("Select Function")
-            .selected_text(format!("{:?}", self.func))
-            .show_ui(ui, |ui| {
-                ui.selectable_value(&mut self.func, MathFunc::Sin, "Sine");
-                ui.selectable_value(&mut self.func, MathFunc::Exp, "Exp");
-            }
-        );
         });
         egui::CentralPanel::default().show(ctx, |ui| {
             let (scroll, pointer_down, modifiers) = ui.input(|i| {
@@ -149,6 +160,7 @@ impl eframe::App for PlotExample {
                     plot_ui.line(Line::new(sine_points).name("somepoints"));
                     // let mut some_points : Vec<Point> = create_sin(0.0, 2.0, 300);
                     let some_points : Vec<[f64;2]> = rdp::rdp_alg(&mut some_points, &self.epsilon).unwrap().iter().map(|x| x.as_arr()).collect();
+                    self.info_string = format!("RDP Compressed to {} points", some_points.len());
                     let sine_points = PlotPoints::from(some_points);
                     plot_ui.line(Line::new(sine_points).name("rdp"));
                 });

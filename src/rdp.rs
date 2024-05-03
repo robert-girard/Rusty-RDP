@@ -74,9 +74,9 @@ pub fn rdp_alg(data : &mut Vec<Point>, eps : &f64) -> Option<Vec<Point>> {
     let mut imax =  0;
     let l1 = data.first()?;
     let l2 = data.last()?;
-    for i in 1..(data.len()-2) {
+    for i in 1..(data.len()-1) {
         let p = data.get(i)?;
-        let d = vertical_distance(l1, l2, p);
+        let d = perpendicular_distance(l1, l2, p);
         if d > dmax {
             imax = i;
             dmax = d;
